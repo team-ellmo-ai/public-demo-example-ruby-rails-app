@@ -66,3 +66,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "ellmo-ai-rails", "~> 0.1.0", path: "vendor/gems/ellmo-ai-rails-0.1.0"

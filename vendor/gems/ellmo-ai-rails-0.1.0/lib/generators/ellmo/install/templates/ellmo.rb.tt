@@ -1,0 +1,22 @@
+# eLLMo AI: adds eLLMo's content to your pages and reports page views (in the background).
+# Every setting and its default: see EllmoAi::Configuration (lib/ellmo_ai/configuration.rb in the gem).
+EllmoAi.configure do |config|
+<% if client_id -%>
+  config.client_id = ENV.fetch("ELLMO_CLIENT_ID", "<%= client_id %>")
+<% else -%>
+  config.client_id = ENV["ELLMO_CLIENT_ID"]
+<% end -%>
+
+  # Off in the test environment unless you turn it on here.
+  # config.enabled = true
+
+  # Seconds content stays fresh before it's refreshed in the background.
+  # config.cache_ttl = 600
+
+  # Seconds a page waits for content when nothing is cached for it yet (0 = never wait).
+  # config.cold_wait = 1.0
+
+  # Log every call to eLLMo and its answer ("[ellmo-ai http]"). Or set ELLMO_DEBUG=1.
+  # Page-view uploads are logged in full, visitors' cookies and IPs included.
+  # config.debug = Rails.env.development?
+end

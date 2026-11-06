@@ -1,3 +1,9 @@
+PATH
+  remote: vendor/gems/ellmo-ai-rails-0.1.0
+  specs:
+    ellmo-ai-rails (0.1.0)
+      rack (>= 2.2, < 4)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -399,6 +405,7 @@ DEPENDENCIES
   bundler-audit
   capybara
   debug
+  ellmo-ai-rails (~> 0.1.0)!
   image_processing (~> 1.2)
   importmap-rails
   jbuilder

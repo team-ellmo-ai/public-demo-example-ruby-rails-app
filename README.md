@@ -26,7 +26,7 @@ SHA-256 of `ellmo-ai-rails-0.1.0.gem`:
 eab8fd5ce3957e8e01e6a3950860fb5e86b92f88af31202e02f27b00fff2f727
 ```
 
-This demo app doesn't use the gem itself. It's a plain Rails app.
+This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.1.0`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.
 
 ## Stack
 
