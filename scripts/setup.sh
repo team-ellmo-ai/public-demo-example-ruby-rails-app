@@ -3,33 +3,36 @@
 # Everything the app needs lives in this repo and in SQLite files under
 # storage/ — no Postgres, MySQL, or Redis to provision, in dev or in
 # whatever's treated as staging here.
-set -euo pipefail
+set -Eeuo pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! command -v ruby &>/dev/null; then
-  echo "✗ Ruby is not installed. Install Ruby 3.4+ and re-run." >&2
-  exit 1
-fi
-echo "✓ Ruby $(ruby -v | awk '{print $2}')"
+# Any failure stops the script immediately with the failing step named.
+# Every step is idempotent, so fixing the cause and re-running is always safe.
+STEP="starting"
+trap 'echo "" >&2; echo "✗ Setup failed during: $STEP" >&2; echo "  Fix the error above and re-run ./scripts/setup.sh (safe to repeat)." >&2' ERR
 
-if ! command -v bundle &>/dev/null; then
-  echo "✗ Bundler is not installed. Run 'gem install bundler' and re-run." >&2
-  exit 1
-fi
+STEP="installing Ruby toolchain"
+# shellcheck source=lib/ruby.sh
+source scripts/lib/ruby.sh
+ensure_ruby
 
+STEP="installing gems"
 echo "→ Installing gems..."
 bundle check >/dev/null 2>&1 || bundle install
 echo "✓ Gems installed"
 
+STEP="preparing the database"
 echo "→ Preparing the SQLite database..."
 bin/rails db:prepare
 echo "✓ Database ready (storage/*.sqlite3)"
 
+STEP="seeding"
 echo "→ Seeding example tasks..."
 bin/rails db:seed
 echo "✓ Seeded"
 
+STEP="setting the Conductor preview URL"
 # Conductor cloud workspace (CONDUCTOR_IS_LOCAL=0): point the workspace's
 # preview URL at the dev server. Not fatal if the CLI is missing or
 # unauthenticated — ./scripts/dev.sh still works without it.
@@ -42,6 +45,7 @@ if [ "${CONDUCTOR_IS_LOCAL:-}" = "0" ] && command -v conductor &>/dev/null; then
   fi
 fi
 
+trap - ERR
 echo ""
 echo "All done! Start the server with:"
 echo "  ./scripts/dev.sh"
