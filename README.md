@@ -16,7 +16,9 @@ CRUD (create, show, edit, delete), used as a demo of a working Rails setup.
 ./scripts/dev.sh
 ```
 
-This installs gems, prepares the SQLite database, seeds a few example tasks,
+This installs the pinned Ruby (`.ruby-version`, via your existing
+mise/rvm/rbenv/asdf — or installs mise if you have none) and the pinned
+Bundler (`Gemfile.lock`), then installs gems, prepares the SQLite database, seeds a few example tasks,
 and starts the server on :3000 (bound to 0.0.0.0, so it works in a Conductor
 cloud workspace too). Visit http://localhost:3000 — it redirects to `/tasks`.
 
