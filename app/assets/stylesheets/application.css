@@ -1,0 +1,321 @@
+/*
+ * This is a manifest file that'll be compiled into application.css.
+ *
+ * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
+ * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
+ * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
+ * depending on specificity.
+ *
+ * Consider organizing styles into separate files for maintainability.
+ */
+
+/*
+ * eLLMo AI brand tokens (the "Olivetti" palette), carried over from
+ * ellmo-ai-marketing-website's @team-ellmo-ai/tokens package so this demo
+ * reads as eLLMo without pulling in the whole design system.
+ */
+:root {
+  --ellmo-ink: #1e2233;
+  --ellmo-ink-muted: #4a535c;
+  --ellmo-on-ink: #ffffff;
+
+  --ellmo-mark-bg: #1e2233;
+  --ellmo-dot-1: #a9c6e8; /* azzurro */
+  --ellmo-dot-2: #f2a38a; /* coral */
+  --ellmo-dot-3: #f2d16e; /* giallo */
+  --ellmo-dot-4: #95cdb5; /* salvia */
+  --ellmo-dot-5: #6f98cf; /* dot blue */
+  --ellmo-dot-centre: #ffffff;
+
+  --ellmo-brand: #f2a38a;
+  --ellmo-brand-hover: #cc8c7a;
+  --ellmo-on-brand: #1e2233;
+  --ellmo-link: #2456a6;
+
+  --ellmo-page: #ffffff;
+  --ellmo-header-bg: #e4edf8;
+  --ellmo-surface: #ffffff;
+  --ellmo-surface-muted: #e4edf8;
+  --ellmo-line: rgba(30, 34, 51, 0.16);
+  --ellmo-line-subtle: rgba(30, 34, 51, 0.08);
+
+  --ellmo-ok-soft: #e3f0e8;
+  --ellmo-ok: #047857;
+  --ellmo-danger-soft: #fbe7e0;
+  --ellmo-danger: #b91c1c;
+
+  --ellmo-font-sans: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --ellmo-radius-sm: 6px;
+  --ellmo-radius-pill: 999px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--ellmo-font-sans);
+  font-size: 1rem;
+  color: var(--ellmo-ink);
+  background: var(--ellmo-page);
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+a { color: var(--ellmo-link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── header / brand ── */
+
+.site-header {
+  background: var(--ellmo-header-bg);
+  border-bottom: 1px solid var(--ellmo-line);
+}
+
+.site-header__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--ellmo-ink);
+}
+
+.site-header__brand:hover { text-decoration: none; }
+
+.ellmo-logo-mark {
+  display: block;
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.ellmo-wordmark {
+  font-family: var(--ellmo-font-sans);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--ellmo-ink);
+  white-space: nowrap;
+}
+
+.ellmo-wordmark-o {
+  position: relative;
+  display: inline-block;
+}
+
+.ellmo-wordmark-o > i {
+  position: absolute;
+  left: 50%;
+  top: 0.535em;
+  width: 0.15em;
+  height: 0.15em;
+  margin-left: -0.075em;
+  border-radius: 50%;
+  background: var(--ellmo-brand);
+  font-style: normal;
+}
+
+.site-header__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--ellmo-line);
+}
+
+.site-header__title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ellmo-ink-muted);
+}
+
+.site-header__nav a {
+  color: var(--ellmo-ink);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+/* ── layout ── */
+
+.site-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.site-main > p {
+  color: var(--ellmo-ink-muted);
+}
+
+/* ── table ── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--ellmo-surface);
+  border: 1px solid var(--ellmo-line);
+  border-radius: var(--ellmo-radius-sm);
+  overflow: hidden;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ellmo-line);
+}
+
+thead th {
+  background: var(--ellmo-surface-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ellmo-ink-muted);
+}
+
+tbody tr:last-child td { border-bottom: none; }
+
+.empty-state {
+  padding: 1.5rem;
+  background: var(--ellmo-surface-muted);
+  border: 1px dashed var(--ellmo-line);
+  border-radius: var(--ellmo-radius-sm);
+  color: var(--ellmo-ink-muted);
+}
+
+/* ── forms ── */
+
+form .field { margin-bottom: 1.25rem; }
+
+form label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--ellmo-ink-muted);
+}
+
+form input[type="text"],
+form textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--ellmo-line);
+  border-radius: var(--ellmo-radius-sm);
+  font-family: var(--ellmo-font-sans);
+  font-size: 1rem;
+  color: var(--ellmo-ink);
+  background: var(--ellmo-surface);
+}
+
+form input[type="text"]:focus,
+form textarea:focus {
+  outline: none;
+  border-color: var(--ellmo-link);
+}
+
+.field-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ellmo-danger);
+}
+
+.form-errors {
+  background: var(--ellmo-danger-soft);
+  border: 1px solid var(--ellmo-danger);
+  border-radius: var(--ellmo-radius-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  color: var(--ellmo-ink);
+}
+
+.form-errors h2 { font-size: 1rem; margin: 0 0 0.5rem; }
+.form-errors ul { margin: 0; padding-left: 1.2rem; }
+
+/* ── task show/detail ── */
+
+.task-detail {
+  background: var(--ellmo-surface);
+  border: 1px solid var(--ellmo-line);
+  border-radius: var(--ellmo-radius-sm);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.task-detail div { margin-bottom: 0.75rem; }
+.task-detail div:last-child { margin-bottom: 0; }
+.task-detail strong { color: var(--ellmo-ink-muted); font-weight: 500; margin-right: 0.4em; }
+
+.task-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ── buttons ── */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  min-height: 2.75rem;
+  padding: 0 1.15em;
+  margin: 0;
+  border: 1px solid var(--ellmo-ink);
+  border-radius: var(--ellmo-radius-sm);
+  background: var(--ellmo-surface);
+  color: var(--ellmo-ink);
+  font-family: var(--ellmo-font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--ellmo-surface-muted);
+  text-decoration: none;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button--brand {
+  border-color: transparent;
+  background: var(--ellmo-brand);
+  color: var(--ellmo-on-brand);
+}
+
+.button--brand:hover {
+  background: var(--ellmo-brand-hover);
+}
+
+a:focus-visible,
+.button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ellmo-link);
+  outline-offset: 2px;
+}
+
+/* ── notices ── */
+
+#notice {
+  background: var(--ellmo-ok-soft);
+  border: 1px solid var(--ellmo-ok);
+  color: var(--ellmo-ink);
+  padding: 0.75rem 1rem;
+  border-radius: var(--ellmo-radius-sm);
+  margin-bottom: 1.5rem;
+}

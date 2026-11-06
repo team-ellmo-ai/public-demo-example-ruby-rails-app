@@ -1,0 +1,11 @@
+<% if notice %>
+  <p id="notice"><%= notice %></p>
+<% end %>
+
+<%= render @task %>
+
+<div class="task-actions">
+  <%= link_to "Edit this task", edit_task_path(@task), class: "button" %>
+  <%= link_to "Back to tasks", tasks_path, class: "button" %>
+  <%= button_to "Destroy this task", @task, method: :delete, class: "button", form: { data: { turbo_confirm: "Are you sure?" } } %>
+</div>

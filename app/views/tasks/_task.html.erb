@@ -1,0 +1,16 @@
+<div id="<%= dom_id task %>" class="task-detail">
+  <div>
+    <strong>Title:</strong>
+    <%= task.title %>
+  </div>
+
+  <div>
+    <strong>Description:</strong>
+    <%= task.description %>
+  </div>
+
+  <div>
+    <strong>Completed:</strong>
+    <%= task.completed? ? "Yes" : "No" %>
+  </div>
+</div>

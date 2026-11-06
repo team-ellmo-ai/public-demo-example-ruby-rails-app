@@ -1,0 +1,35 @@
+<%= form_with(model: task) do |form| %>
+  <% if task.errors.any? %>
+    <div class="form-errors">
+      <h2><%= pluralize(task.errors.count, "error") %> prohibited this task from being saved:</h2>
+
+      <ul>
+        <% task.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :title %>
+    <%= form.text_field :title, required: true, aria: { invalid: task.errors[:title].any? } %>
+    <% if task.errors[:title].any? %>
+      <p class="field-error"><%= task.errors[:title].first %></p>
+    <% end %>
+  </div>
+
+  <div class="field">
+    <%= form.label :description %>
+    <%= form.textarea :description %>
+  </div>
+
+  <div class="field">
+    <%= form.label :completed %>
+    <%= form.checkbox :completed %>
+  </div>
+
+  <div>
+    <%= form.submit class: "button button--brand" %>
+  </div>
+<% end %>
