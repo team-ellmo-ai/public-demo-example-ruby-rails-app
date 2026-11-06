@@ -333,6 +333,6 @@ Continued use after the effective date means you accept the updated License.
 ## Contact
 
 **Legal notices, abuse reports, and security:** security@tryellmo.ai
-**Licensing, renewals, tier changes, and permission requests:** armando@tryellmo.ai
+**Licensing, renewals, tier changes, and permission requests:** sales@tryellmo.ai
 
 **eLLMo AI** · [www.tryellmo.ai](https://www.tryellmo.ai) · [Legal](https://www.tryellmo.ai/legal)

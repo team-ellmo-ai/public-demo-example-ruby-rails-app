@@ -71,8 +71,6 @@ bin/rails test:system    # browser-driven (Capybara + headless Chrome)
 
 **Copyright © 2026 eLLMo AI. All rights reserved.**
 
-This is proprietary software, not open source. The demo app and the `ellmo-ai-rails` gem in [`dist/`](dist/) are licensed under [`LICENSE.md`](LICENSE.md) and the eLLMo AI [Terms & Conditions](https://www.tryellmo.ai/legal/terms): a limited, revocable license for eLLMo AI subscribers, for the websites their subscription covers, that ends when the subscription does. The source is public so you can inspect it before you install it. That doesn't grant any right to use, copy or redistribute it.
+This is proprietary software, not open source. The demo app and the `ellmo-ai-rails` gem in [`dist/`](dist/) are licensed under [`LICENSE.md`](LICENSE.md) and the eLLMo AI [Terms & Conditions](https://www.tryellmo.ai/legal/terms): a limited, revocable license for eLLMo AI subscribers, for the websites their subscription covers, that ends when the subscription does. Public source code doesn't grant any right to use, copy or redistribute it.
 
-If you use the gem, you're responsible for disclosing eLLMo and the `ellmo_ext_vid` cookie to your visitors and for any consent the law requires (see License §12).
-
-Licensing questions: armando@tryellmo.ai.
+Licensing questions: sales@tryellmo.ai.
