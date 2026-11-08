@@ -23,7 +23,7 @@ The gem is included with an eLLMo AI subscription, and you need the client ID eL
 SHA-256 of `ellmo-ai-rails-0.1.0.gem`:
 
 ```text
-9456ae73d43e4513eb3d4a16414b0264cb28e80c846870faa8a2582aa9291b4b
+48a21d20bb41a06cb97ed3ee7ab2962a48ec0e206991feea5363227339f73f88
 ```
 
 This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.1.0`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.

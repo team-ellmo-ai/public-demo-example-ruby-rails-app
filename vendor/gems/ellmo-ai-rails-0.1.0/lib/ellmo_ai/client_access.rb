@@ -5,7 +5,7 @@ module EllmoAi
   # and whether it is served content (`content`). eLLMo's servers enforce both; checking
   # here saves calls that would be refused.
   #
-  # Read from GET <access_url>/<client_id> (the client ID is the customer's asset bucket ID)
+  # Read from GET <access_url>/<client_id> (the client ID eLLMo gave you)
   # at most once per `access_interval` (30 min) per app process, always from a background
   # thread, never during a page request.
   #

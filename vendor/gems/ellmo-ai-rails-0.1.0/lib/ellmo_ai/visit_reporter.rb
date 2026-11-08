@@ -7,7 +7,7 @@ module EllmoAi
   #   the visit is dropped (and counted), so a slow or unreachable receiver can never slow pages
   #   down or grow memory.
   # - The thread sends a batch every `flush_interval` seconds, or as soon as `batch_size` visits
-  #   are queued, as one gzipped JSON array (at most 250: Analytics Engine's per-request limit).
+  #   are queued, as one gzipped JSON array (at most 250: the receiver's per-request limit).
   #   A failed batch is retried once, then dropped.
   # - Fork-safe: a thread does not survive fork (Puma workers), so each process starts its own
   #   on first use. Pending visits are flushed at exit.

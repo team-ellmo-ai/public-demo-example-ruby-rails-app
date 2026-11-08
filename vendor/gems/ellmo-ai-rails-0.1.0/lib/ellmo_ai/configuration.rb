@@ -114,7 +114,7 @@ module EllmoAi
       "#{api_url.to_s.chomp('/')}/embedded-content_v2"
     end
 
-    # Analytics Engine takes at most 250 events per request.
+    # The analytics receiver takes at most 250 events per request.
     def effective_batch_size
       batch_size.to_i.clamp(1, 250)
     end

@@ -10,9 +10,8 @@
  */
 
 /*
- * eLLMo AI brand tokens (the "Olivetti" palette), carried over from
- * ellmo-ai-marketing-website's @team-ellmo-ai/tokens package so this demo
- * reads as eLLMo without pulling in the whole design system.
+ * eLLMo AI brand tokens (the "Olivetti" palette), so this demo reads as eLLMo
+ * without pulling in the whole design system.
  */
 :root {
   --ellmo-ink: #1e2233;
