@@ -16,17 +16,77 @@ It's also where you download **`ellmo-ai-rails`**, eLLMo's gem for Rails apps, u
 
 ## Download the eLLMo Rails gem
 
-[`dist/ellmo-ai-rails-0.1.0.gem`](dist/ellmo-ai-rails-0.1.0.gem) adds eLLMo's content (schema.org structured data and semantic HTML) to the HTML your Rails app serves, so search engines and AI assistants understand your pages. It also reports page views, AI crawler visits included, to eLLMo in the background. It works with Rails 7.1+ and any Rack app on Ruby 3.2+.
+[`dist/ellmo-ai-rails-0.1.0.gem`](dist/ellmo-ai-rails-0.1.0.gem) adds eLLMo's content (schema.org structured data and semantic HTML) to the HTML your Rails app serves, so search engines and AI assistants understand your pages. It also reports page views, AI crawler visits included, to eLLMo in the background. It works with Rails 6.1+ and any Rack app on Ruby 3.2+.
 
 The gem is included with an eLLMo AI subscription, and you need the client ID eLLMo issues for your site. Install it by following the [Rails SDK docs](https://docs.tryellmo.ai/developers/rails/overview?utm_source=github&utm_medium=repo&utm_campaign=public-demo-example-ruby-rails-app).
 
 SHA-256 of `ellmo-ai-rails-0.1.0.gem`:
 
 ```text
-eab8fd5ce3957e8e01e6a3950860fb5e86b92f88af31202e02f27b00fff2f727
+9456ae73d43e4513eb3d4a16414b0264cb28e80c846870faa8a2582aa9291b4b
 ```
 
 This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.1.0`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.
+
+## eLLMo in this app
+
+With a client ID, every Tasks page the app serves gets eLLMo's content, with no template changes:
+
+- **Structured data** (schema.org JSON-LD) just before `</head>`.
+- **Semantic HTML** right after `<body>`.
+
+Page views are queued and sent to eLLMo from a background thread, in batches, so they never slow a page down. JSON responses (`/tasks.json`), files (`/robots.txt`) and the health check (`/up`) are left alone.
+
+The settings this demo shows, in `config/initializers/ellmo.rb`:
+
+| Setting | Default | Here |
+|---|---|---|
+| `visitor_cookie` | `true` | `ELLMO_VISITOR_COOKIE=false` turns off the first-party `ellmo_ext_vid` cookie that recognizes returning visitors. Page views are still reported, without a visitor ID. A callable can wait for consent instead. |
+| `report_visits` | `true` | `ELLMO_REPORT_VISITS=false` stops page views. Pages still get content. |
+| `forward_cookies` | `false` | Your visitors' `Cookie` header (your session cookies) is never sent to eLLMo unless you turn this on. |
+
+eLLMo can also switch page views or content off for a client ID from its side; the gem checks every 30 minutes and follows.
+
+### See it working, without a client ID
+
+`./scripts/try-ellmo.sh` does four things:
+
+1. It starts a local stand-in for eLLMo's API (`scripts/fake_ellmo_server.rb`).
+2. It runs this app against that stand-in with `rails server`.
+3. It loads `/tasks` like a browser.
+4. It prints what the page got and what eLLMo received.
+
+```bash
+./scripts/try-ellmo.sh                              # defaults
+ELLMO_VISITOR_COOKIE=false ./scripts/try-ellmo.sh   # visitor cookie off
+ELLMO_REPORT_VISITS=false ./scripts/try-ellmo.sh    # page views off in the app
+FAKE_ELLMO_VISITS=false ./scripts/try-ellmo.sh      # page views switched off by eLLMo
+```
+
+With the visitor cookie off:
+
+```text
+GET /tasks
+  structured data: yes
+  semantic HTML:   yes
+  visitor cookie:  not set
+eLLMo received:
+  content request: u=/tasks s=static
+  page views: 1
+    http://127.0.0.1:3010/tasks status=200 visitorId=nil cookie header sent: false
+```
+
+### Tests
+
+`test/integration/ellmo_test.rb` runs the whole app, the gem's middleware included, against the same stand-in (`test/support/fake_ellmo.rb`). It covers:
+
+- **Visitor cookie off:** structured data and semantic HTML in the page, no cookie, and the page view is reported without a visitor ID.
+- **Visitor cookie on:** a first-time visitor gets the cookie, and their page views carry its ID.
+- **Page views switched off by eLLMo, or turned off in the app:** pages still get content, and nothing is reported.
+- **Content switched off by eLLMo:** pages go out as the app rendered them, and views are still reported.
+- **Your visitors' cookies aren't sent to eLLMo.**
+- **JSON, files and the health check are left alone.**
+- **Each page gets the content for its own path.**
 
 ## Stack
 
@@ -63,7 +123,7 @@ bin/rails server
 ## Test
 
 ```bash
-bin/rails test           # models, controllers
+bin/rails test           # models, controllers, eLLMo (test/integration/ellmo_test.rb)
 bin/rails test:system    # browser-driven (Capybara + headless Chrome)
 ```
 

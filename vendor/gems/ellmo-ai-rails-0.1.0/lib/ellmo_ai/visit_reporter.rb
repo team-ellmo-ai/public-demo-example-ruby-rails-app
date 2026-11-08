@@ -16,10 +16,12 @@ module EllmoAi
     # switched this client's page views off.
     attr_reader :dropped, :sent, :disabled
 
-    def initialize(config, http: Http, access: nil)
+    # `access_for`: the switches for a client ID, for apps with several clients. Default: `access`.
+    def initialize(config, http: Http, access: nil, access_for: nil)
       @config = config
       @http = http
       @access = access || ClientAccess.new(config, http: http)
+      @access_for = access_for || ->(_client_id) { @access }
       @disabled = 0
       @mutex = Mutex.new
       @pid = nil
@@ -30,7 +32,7 @@ module EllmoAi
 
     # Queue one visit (a Hash in the receiver's payload shape). Never blocks, never raises.
     def report(event)
-      unless @access.visits?
+      unless @access_for.call(event["clientId"]).visits?
         @mutex.synchronize { @disabled += 1 }
         return
       end
@@ -70,7 +72,7 @@ module EllmoAi
         return if @pid == Process.pid && @thread&.alive?
 
         # After a fork the parent's queue and thread are copies we must not share.
-        @queue = SizedQueue.new([@config.max_queue.to_i, 1].max)
+        @queue = SizedQueue.new(@config.count(:max_queue))
         @stopping = false
         @pid = Process.pid
         @thread = Thread.new { run }
@@ -85,7 +87,7 @@ module EllmoAi
 
     def run
       batch = []
-      deadline = monotonic + @config.flush_interval.to_f
+      deadline = monotonic + @config.seconds(:flush_interval)
       loop do
         timeout = [deadline - monotonic, 0].max
         item = @queue.pop(timeout: timeout)
@@ -96,19 +98,31 @@ module EllmoAi
         stop = item == :flush || @stopping
         if full || due || stop
           drain(batch) if stop
-          @access.check! unless batch.empty?
-          if @access.visits?
-            send_batches(batch)
-          else
-            @mutex.synchronize { @disabled += batch.size }
-          end
+          flush(batch)
           batch = []
-          deadline = monotonic + @config.flush_interval.to_f
+          deadline = monotonic + @config.seconds(:flush_interval)
         end
         break if stop && @queue.empty?
       end
     rescue StandardError => e
       @config.logger&.warn("[ellmo-ai] visit reporter stopped: #{e.class}: #{e.message}")
+    end
+
+    # One batch: never lets an error stop the thread; what can't be sent is counted as dropped.
+    def flush(batch)
+      # Per client: each has its own switches (one client in most apps)
+      batch.group_by { |event| event["clientId"] }.each do |client_id, events|
+        access = @access_for.call(client_id)
+        access.check!
+        if access.visits?
+          send_batches(events)
+        else
+          @mutex.synchronize { @disabled += events.size }
+        end
+      end
+    rescue StandardError => e
+      @mutex.synchronize { @dropped += batch.size }
+      @config.logger&.warn("[ellmo-ai] dropped #{batch.size} visits: #{e.class}: #{e.message}")
     end
 
     def drain(batch)
@@ -125,17 +139,25 @@ module EllmoAi
     end
 
     def deliver(events)
-      body = Http.gzip(JSON.generate(events))
+      body = begin
+        Http.gzip(JSON.generate(events))
+      rescue StandardError => e # e.g. a value that isn't valid UTF-8
+        @mutex.synchronize { @dropped += events.size }
+        return @config.logger&.warn("[ellmo-ai] dropped #{events.size} visits: #{e.class}: #{e.message}")
+      end
       headers = { "content-type" => "application/json", "content-encoding" => "gzip" }
       2.times do |attempt|
         sleep(1) if attempt.positive? && !@stopping
         begin
           response = Http.for(@config, @http.adapter).post(@config.analytics_url, body: body, headers: headers,
-                                                                                  timeout: @config.report_timeout.to_f)
-          # The receiver answers 204 to everything it read; only a 5xx is worth a retry.
-          if response.status < 500
+                                                                                  timeout: @config.seconds(:report_timeout))
+          # The receiver answers 204 to everything it read. A 4xx means it refused the batch
+          # (retrying won't help); only a 5xx is worth a retry.
+          if response.status < 400
             @mutex.synchronize { @sent += events.size }
             return
+          elsif response.status < 500
+            break
           end
         rescue StandardError => e
           @config.logger&.debug("[ellmo-ai] visit batch failed: #{e.class}: #{e.message}")

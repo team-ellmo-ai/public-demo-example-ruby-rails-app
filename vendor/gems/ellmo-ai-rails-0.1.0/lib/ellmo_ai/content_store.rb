@@ -18,12 +18,15 @@ module EllmoAi
 
     # One request's view of a page's content: resolved now, or after a refresh (bounded wait).
     class Lookup
-      def initialize(content: nil, thread: nil, deadline: nil, store: nil, path: nil)
+      # `cache_fallback`: on timeout, serve what's cached. Off until this process has heard from
+      # eLLMo's access check, so a switched-off client isn't served old content from a shared cache.
+      def initialize(content: nil, thread: nil, deadline: nil, store: nil, path: nil, cache_fallback: true)
         @content = content
         @thread = thread
         @deadline = deadline
         @store = store
         @path = path
+        @cache_fallback = cache_fallback
       end
 
       # The content, or nil. Waits for an in-flight refresh until the deadline, never longer.
@@ -32,7 +35,9 @@ module EllmoAi
 
         remaining = @deadline - Process.clock_gettime(Process::CLOCK_MONOTONIC)
         finished = remaining.positive? && @thread.join(remaining)
-        @content = finished ? @thread.value : @store.cached(@path)
+        @content = if finished then @thread.value
+                   elsif @cache_fallback then @store.cached(@path)
+                   end
         @thread = nil
         @content
       end
@@ -72,12 +77,14 @@ module EllmoAi
       end
     end
 
-    def initialize(config, http: Http, access: nil)
+    def initialize(config, http: Http, access: nil, client_id: config.client_id)
       @config = config
       @http = http
-      @access = access || ClientAccess.new(config, http: http)
+      @client_id = client_id
+      @access = access || ClientAccess.new(config, http: http, client_id: client_id)
       @inflight = {}
       @mutex = Mutex.new
+      @pid = Process.pid
     end
 
     # Start looking up a page's content. Call before rendering; read Lookup#value after.
@@ -85,10 +92,13 @@ module EllmoAi
       # eLLMo has switched this client's content off: serve none, cached or not.
       return Lookup.new unless @access.content?
 
+      # One budget for the whole lookup: the access wait and the content wait share cold_wait.
+      deadline = now_mono + @config.seconds(:cold_wait)
+
       # Until this process has heard from eLLMo, don't trust the cache (a shared Rails.cache may
-      # hold content from before the client was switched off): wait for the first answer, up to
-      # cold_wait, and if it still hasn't come, ask the API, which enforces access.
-      answered = @access.answered? || @access.wait_for_answer(@config.cold_wait.to_f)
+      # hold content from before the client was switched off): wait for the first answer, within
+      # the budget, and if it still hasn't come, ask the API, which enforces access.
+      answered = @access.answered? || @access.wait_for_answer(deadline - now_mono)
       return Lookup.new unless @access.content?
 
       entry = answered ? read(path) : nil
@@ -100,7 +110,7 @@ module EllmoAi
       thread = refresh_async(path)
       return Lookup.new unless thread
 
-      Lookup.new(thread: thread, deadline: now_mono + @config.cold_wait.to_f, store: self, path: path)
+      Lookup.new(thread: thread, deadline: deadline, store: self, path: path, cache_fallback: answered)
     end
 
     # What is cached for a page right now (fresh or stale), or nil.
@@ -117,15 +127,19 @@ module EllmoAi
 
       result = fetch(path)
       previous = read(path)
-      if result
-        write(path, result.structured, result.semantic, now_wall + @config.cache_ttl.to_f)
+      if result == :refused
+        # The API refused (this client is switched off, or unknown): drop what was cached.
+        write(path, nil, nil, now_wall + @config.seconds(:error_backoff))
+        nil
+      elsif result
+        write(path, result.structured, result.semantic, now_wall + @config.seconds(:cache_ttl))
         result
       elsif previous
         # Keep serving what we had; try again after the backoff.
-        write(path, previous["structured"], previous["semantic"], now_wall + @config.error_backoff.to_f)
+        write(path, previous["structured"], previous["semantic"], now_wall + @config.seconds(:error_backoff))
         to_content(previous)
       else
-        write(path, nil, nil, now_wall + @config.error_backoff.to_f)
+        write(path, nil, nil, now_wall + @config.seconds(:error_backoff))
         nil
       end
     end
@@ -133,14 +147,13 @@ module EllmoAi
     private
 
     def refresh_async(path)
+      reset_after_fork
       @mutex.synchronize do
         existing = @inflight[path]
         return existing if existing
-        return nil if @inflight.size >= @config.max_refreshes.to_i
+        return nil if @inflight.size >= @config.count(:max_refreshes)
 
-        @inflight[path] = Thread.new do
-          Thread.current.name = "ellmo_ai-content"
-          Thread.current.report_on_exception = false
+        thread = Thread.new do
           refresh(path)
         rescue StandardError => e
           @config.logger&.warn("[ellmo-ai] content refresh failed for #{path}: #{e.class}: #{e.message}")
@@ -148,18 +161,33 @@ module EllmoAi
         ensure
           @mutex.synchronize { @inflight.delete(path) }
         end
+        # Named and set up here, not inside the thread, so they're in place as soon as it exists
+        thread.name = "ellmo_ai-content"
+        thread.report_on_exception = false
+        @inflight[path] = thread
       end
     end
 
-    # nil when the API could not be reached or answered non-2xx / non-JSON.
+    # Refreshes running when the process forked (a warming script before Puma forks) don't exist
+    # in the child: forget them, or they'd hold max_refreshes slots and block their paths forever.
+    def reset_after_fork
+      return if @pid == Process.pid
+
+      @pid = Process.pid
+      @mutex = Mutex.new
+      @inflight = {}
+    end
+
+    # The content; :refused when the API said no (4xx: this client is off, or unknown); nil when
+    # it couldn't be reached or answered 408 / 429 / 5xx / non-JSON (worth trying again later).
     def fetch(path)
-      query = URI.encode_www_form(c: @config.client_id, u: path, v: VERSION, s: "static")
+      query = URI.encode_www_form(c: @client_id, u: path, v: VERSION, s: "static")
       response = Http.for(@config, @http.adapter).get("#{@config.content_endpoint}?#{query}",
                                                       headers: { "accept" => "application/json" },
-                                                      timeout: @config.fetch_timeout.to_f)
+                                                      timeout: @config.seconds(:fetch_timeout))
       unless (200..299).cover?(response.status)
         @config.logger&.warn("[ellmo-ai] content API returned #{response.status} for #{path}")
-        return nil
+        return (400..499).cover?(response.status) && ![408, 429].include?(response.status) ? :refused : nil
       end
 
       body = JSON.parse(response.body.to_s)
@@ -182,7 +210,10 @@ module EllmoAi
 
     def write(path, structured, semantic, fresh_until)
       entry = { "structured" => structured, "semantic" => semantic, "fresh_until" => fresh_until }
-      ttl = [fresh_until - now_wall, 0].max + @config.stale_ttl.to_f
+      # "Nothing for this page" isn't worth keeping past its freshness: requests for random URLs
+      # would otherwise fill a shared cache with a day's worth of empty entries.
+      stale = structured || semantic ? @config.seconds(:stale_ttl) : 0
+      ttl = [fresh_until - now_wall, 0].max + stale
       store.write(key(path), entry, expires_in: ttl)
     end
 
@@ -192,7 +223,7 @@ module EllmoAi
 
     def key(path)
       id = path.bytesize > 200 ? Digest::SHA256.hexdigest(path) : path
-      "ellmo_ai/v1/#{@config.client_id}/#{id}"
+      "ellmo_ai/v1/#{@client_id}/#{id}"
     end
 
     # The configured store, else Rails.cache, else our own. Rails' development and test default

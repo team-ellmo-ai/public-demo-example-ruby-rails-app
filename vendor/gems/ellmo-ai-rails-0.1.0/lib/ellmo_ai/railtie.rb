@@ -7,6 +7,8 @@ module EllmoAi
     # middleware see the page with eLLMo content already in it.
     initializer "ellmo_ai.middleware" do |app|
       app.config.middleware.use EllmoAi::Middleware
+      # Outermost, so page views carry the status the visitor got (see FinalStatus).
+      app.config.middleware.insert_before 0, EllmoAi::FinalStatus
     end
 
     initializer "ellmo_ai.helpers" do
