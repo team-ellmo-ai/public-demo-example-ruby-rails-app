@@ -17,14 +17,19 @@ module EllmoAi
 
     private
 
+    # Never breaks the view: outside a request (mailers) or on any error, it renders nothing.
     def ellmo_piece(name)
-      env = request.env
-      lookup = env[Middleware::LOOKUP]
+      env = respond_to?(:request) && request&.env
+      lookup = env && env[Middleware::LOOKUP]
       return nil unless lookup
 
       (env[Middleware::RENDERED] ||= {})[name] = true
       value = lookup.value&.public_send(name)
+      value = JsonLdCleanup.apply(value, EllmoAi.config, env) if name == :structured
       value.respond_to?(:html_safe) ? value.html_safe : value # rubocop:disable Rails/OutputSafety
+    rescue StandardError => e
+      EllmoAi.config.logger&.warn("[ellmo-ai] ellmo_#{name} skipped: #{e.class}: #{e.message}")
+      nil
     end
   end
 end

@@ -16,9 +16,10 @@ module EllmoAi
   class ClientAccess
     attr_reader :failures
 
-    def initialize(config, http: Http)
+    def initialize(config, http: Http, client_id: config.client_id)
       @config = config
       @http = http
+      @client_id = client_id
       @answer = nil       # { visits: bool, content: bool } from the last successful check
       @failures = 0       # failed checks in a row
       @checked_at = nil   # monotonic time of the last attempt
@@ -60,11 +61,9 @@ module EllmoAi
       return unless due?
       return if @thread&.alive?
 
-      @thread = Thread.new do
-        Thread.current.name = "ellmo_ai-access"
-        Thread.current.report_on_exception = false
-        check!
-      end
+      @thread = Thread.new { check! }
+      @thread.name = "ellmo_ai-access"
+      @thread.report_on_exception = false
     end
 
     private
@@ -77,7 +76,7 @@ module EllmoAi
     end
 
     def due?
-      @checked_at.nil? || monotonic - @checked_at >= @config.access_interval.to_f
+      @checked_at.nil? || monotonic - @checked_at >= @config.seconds(:access_interval)
     end
 
     def perform
@@ -93,9 +92,9 @@ module EllmoAi
     end
 
     def fetch
-      url = "#{@config.access_url.to_s.chomp('/')}/#{URI.encode_www_form_component(@config.client_id.to_s)}"
+      url = "#{@config.access_url.to_s.chomp('/')}/#{URI.encode_www_form_component(@client_id.to_s)}"
       response = Http.for(@config, @http.adapter).get(url, headers: { "accept" => "application/json" },
-                                                           timeout: @config.fetch_timeout.to_f)
+                                                           timeout: @config.seconds(:fetch_timeout))
       return nil unless (200..299).cover?(response.status)
 
       body = JSON.parse(response.body.to_s)
@@ -118,6 +117,9 @@ module EllmoAi
       @pid = Process.pid
       @mutex = Mutex.new
       @thread = nil
+      # A first check still running at fork never answers here: check again instead of waiting
+      # 30 minutes with no answer.
+      @checked_at = nil unless answered?
     end
 
     def monotonic
