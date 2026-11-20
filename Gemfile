@@ -67,4 +67,4 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "ellmo-ai-rails", "~> 0.2.0", path: "vendor/gems/ellmo-ai-rails-0.2.0"
+gem "ellmo-ai-rails", "~> 0.2.1", path: "vendor/gems/ellmo-ai-rails-0.2.1"

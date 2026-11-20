@@ -1,17 +1,26 @@
 # ellmo-ai-rails
 
-Add [eLLMo AI](https://www.tryellmo.ai?utm_source=rubygems&utm_medium=package&utm_campaign=ellmo-ai-rails)'s content to the HTML your Rails app serves: **structured data** (schema.org JSON-LD) and **semantic HTML**, written and kept up to date by eLLMo, so search engines and AI assistants understand your pages. Page views (AI crawlers included) are reported to eLLMo in the background.
+Add [eLLMo AI](https://www.tryellmo.ai?utm_source=gem&utm_medium=package&utm_campaign=ellmo-ai-rails)'s content to the HTML your Rails app serves: **structured data** (schema.org JSON-LD) and **semantic HTML**, written and kept up to date by eLLMo, so search engines and AI assistants understand your pages. Page views (AI crawlers included) are reported to eLLMo in the background.
 
 Works with Rails 6.1+ and any Rack app (Sinatra, Hanami) on Ruby 3.2+.
 
-Customer implementation guide, with a flow diagram: [docs/implementation-guide.md](docs/implementation-guide.md).
+Install guide and how it works: [docs.tryellmo.ai/developers/rails](https://docs.tryellmo.ai/developers/rails/overview?utm_source=gem&utm_medium=package&utm_campaign=ellmo-ai-rails).
 
 ## Install
 
+The gem isn't on RubyGems. Download it, check it against the SHA-256 checksum the [install guide](https://docs.tryellmo.ai/developers/rails/overview?utm_source=gem&utm_medium=package&utm_campaign=ellmo-ai-rails) lists, unpack it into your app and point Bundler at it:
+
 ```bash
-bundle add ellmo-ai-rails
+curl -fsSLO https://raw.githubusercontent.com/team-ellmo-ai/public-demo-example-ruby-rails-app/main/dist/ellmo-ai-rails-0.2.1.gem
+shasum -a 256 ellmo-ai-rails-0.2.1.gem   # must print the install guide's checksum; if not, stop
+gem unpack ellmo-ai-rails-0.2.1.gem --target vendor/gems
+gem spec ellmo-ai-rails-0.2.1.gem --ruby > vendor/gems/ellmo-ai-rails-0.2.1/ellmo-ai-rails.gemspec
+rm ellmo-ai-rails-0.2.1.gem
+bundle add ellmo-ai-rails --path vendor/gems/ellmo-ai-rails-0.2.1
 bin/rails g ellmo:install YOUR_CLIENT_ID   # or set ELLMO_CLIENT_ID and omit it
 ```
+
+Commit `vendor/gems/ellmo-ai-rails-0.2.1` with your `Gemfile` and `Gemfile.lock`, so the gem deploys with your app.
 
 That's all: every HTML page now gets eLLMo's content, with no template changes. You need a **client ID** from eLLMo.
 
@@ -28,6 +37,12 @@ To choose where the content goes, add the helpers to your layout. Each piece is 
 ```
 
 Outside Rails, add the middleware yourself: `use EllmoAi::Middleware` (Sinatra: `use EllmoAi::Middleware` in the app; configure with `EllmoAi.configure`). If other middleware can change the status (`Rack::ConditionalGet`), also put `use EllmoAi::FinalStatus` first, so page views carry the status the visitor got. Rails installs both.
+
+### If the install fails
+
+- **The checksum doesn't match:** delete the file and download it again. If it still doesn't match, don't install it: tell your eLLMo contact.
+- **`cannot load such file -- logger`** (Ruby 4.0): your app has 0.2.0 or older. Download, check and unpack 0.2.1 as above, change the `path:` of `ellmo-ai-rails` in your `Gemfile` to `vendor/gems/ellmo-ai-rails-0.2.1`, run `bundle install`, and delete the old folder.
+- **Anything else:** send your eLLMo contact your client ID, the output of `ruby -v`, the gem version (`EllmoAi::VERSION`) and the full error.
 
 ## How it behaves
 
@@ -85,7 +100,7 @@ bundle exec rake test                                         # unit + Rails int
 BUNDLE_GEMFILE=gemfiles/rails_6_1.gemfile bundle exec rake test  # against another Rails
 ```
 
-Released by publishing a GitHub release tagged `rails@<version>` (matching `lib/ellmo_ai/version.rb`); see the root README.
+Not published to RubyGems: each release is a gem file in [the demo app's `dist/`](https://github.com/team-ellmo-ai/public-demo-example-ruby-rails-app/tree/main/dist).
 
 ## License
 

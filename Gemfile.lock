@@ -1,7 +1,8 @@
 PATH
-  remote: vendor/gems/ellmo-ai-rails-0.2.0
+  remote: vendor/gems/ellmo-ai-rails-0.2.1
   specs:
-    ellmo-ai-rails (0.2.0)
+    ellmo-ai-rails (0.2.1)
+      logger (>= 1.4, < 2)
       rack (>= 2.2, < 4)
 
 GEM
@@ -405,7 +406,7 @@ DEPENDENCIES
   bundler-audit
   capybara
   debug
-  ellmo-ai-rails (~> 0.2.0)!
+  ellmo-ai-rails (~> 0.2.1)!
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
