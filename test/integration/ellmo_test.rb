@@ -21,9 +21,9 @@ class EllmoTest < ActionDispatch::IntegrationTest
     @ellmo.stop
   end
 
-  # The common case for a customer who turned eLLMo's visitor cookie off.
-  test "visitor cookie off: the page gets structured data and semantic HTML, and the page view is reported" do
-    configure_ellmo { |c| c.visitor_cookie = false }
+  # The common case: the visitor cookie is off unless the site turns it on.
+  test "visitor cookie off (the default): the page gets structured data and semantic HTML, and the page view is reported" do
+    configure_ellmo { |c| c.visitor_cookie = false } # the gem's default
 
     get "/tasks", headers: browser
 
@@ -41,9 +41,13 @@ class EllmoTest < ActionDispatch::IntegrationTest
     assert_nil view["visitorId"], "no cookie, so no visitor ID"
     assert_equal "Mozilla/5.0 (Macintosh) Safari/605.1.15", view["headers"]["user-agent"]
     assert_kind_of Integer, view["latencyMs"]
+
+    # Off means off: a visitor who already has the cookie gets no visitor ID either
+    get "/tasks", headers: browser.merge("Cookie" => "ellmo_ext_vid=returning-visitor-1")
+    assert_nil wait_for_page_views(2).last["visitorId"]
   end
 
-  test "visitor cookie on (the default): first-time visitors get ellmo_ext_vid, and page views carry it" do
+  test "visitor cookie on: first-time visitors get ellmo_ext_vid, and page views carry it" do
     get "/tasks", headers: browser
 
     cookie = response.headers["set-cookie"].to_s[/ellmo_ext_vid=([^;]+)/, 1]
@@ -146,7 +150,8 @@ class EllmoTest < ActionDispatch::IntegrationTest
       c.access_url = "#{@ellmo.url}/access"
       c.flush_interval = 0.1      # send page views at once
       c.logger = Logger.new(nil)
-      # The settings these tests change, back to their defaults (EllmoAi.config is app-wide)
+      # The settings these tests change, reset (EllmoAi.config is app-wide). The visitor cookie is
+      # on here, though the gem's default is off, so each test shows what else keeps it off.
       c.report_visits = true
       c.visitor_cookie = true
       c.forward_cookies = false

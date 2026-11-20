@@ -5,6 +5,7 @@
 - README: the install steps work. The gem isn't on RubyGems, so `bundle add ellmo-ai-rails` alone failed. The README now downloads the gem file, checks its SHA-256 checksum, vendors it and points Bundler at it, and links to the install guide. A new "If the install fails" section covers a checksum that doesn't match and the Ruby 4.0 `logger` error.
 - The gem now depends on `logger`. Ruby 4.0 removed it from the default gems, so on Ruby 4.0 an app with no other gem that depends on `logger` failed to load this one (`cannot load such file -- logger`).
 - The gem loads only `cgi/escape`, not all of `cgi`, so Ruby 4.0 no longer warns that the CGI library was removed (shown when Ruby warnings are on).
+- Privacy: the visitor cookie is off by default. Without `config.visitor_cookie = true` (or a consent callable), the gem sets no `ellmo_ext_vid` cookie and sends no visitor ID. Off now means off: while it's off for a request, no visitor ID is sent, even from a cookie the visitor already has (before, an existing cookie's ID was still sent). To turn it on, set `config.visitor_cookie = true`.
 
 ## 0.2.0 (2026-11-20)
 

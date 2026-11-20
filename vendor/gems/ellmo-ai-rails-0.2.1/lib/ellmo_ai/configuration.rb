@@ -33,9 +33,10 @@ module EllmoAi
 
     # Visits
     attr_accessor :report_visits   # report page views to eLLMo (default true)
-    # Set the first-party ellmo_ext_vid cookie (default true). Or a callable deciding per request,
-    # e.g. only after consent: ->(request) { request.cookies["consent"] == "yes" }. One that
-    # raises counts as false.
+    # Give visitors the first-party ellmo_ext_vid cookie and send its random ID with their page
+    # views (default false). Or a callable deciding per request, e.g. only after consent:
+    # ->(request) { request.cookies["consent"] == "yes" }. One that raises counts as false. Off for
+    # a request, no visitor ID is sent, not even from a cookie the visitor already has.
     attr_accessor :visitor_cookie
     # Include the visitor's Cookie header in the headers sent to eLLMo (default false): it holds
     # your session cookies, and eLLMo doesn't need them (the visitor ID is sent on its own).
@@ -83,7 +84,7 @@ module EllmoAi
       @max_refreshes = 8
       @hide_other_json_ld = false
       @report_visits = true
-      @visitor_cookie = true
+      @visitor_cookie = false
       @forward_cookies = false
       @forward_headers = false
       @truncate_ip = true
@@ -112,7 +113,7 @@ module EllmoAi
       nil
     end
 
-    # Whether to give this request's visitor the cookie (see visitor_cookie).
+    # Whether this request's visitor gets the cookie and has its ID sent (see visitor_cookie).
     def visitor_cookie_for?(env)
       setting = visitor_cookie
       setting.respond_to?(:call) ? !!setting.call(Rack::Request.new(env)) : !!setting

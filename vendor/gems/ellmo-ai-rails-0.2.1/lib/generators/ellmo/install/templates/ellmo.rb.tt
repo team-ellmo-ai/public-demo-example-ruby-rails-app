@@ -20,7 +20,10 @@ EllmoAi.configure do |config|
   # active schema for crawlers that run JavaScript. Can cost you your own rich results.
   # config.hide_other_json_ld = true
 
-  # Set the visitor cookie only for visitors who consented (default: every visitor).
+  # A first-party cookie (ellmo_ext_vid, a random ID) so returning visitors are recognized. Off by
+  # default: no cookie, and no visitor ID is sent. Turn it on for every visitor, or only for
+  # visitors who consented:
+  # config.visitor_cookie = true
   # config.visitor_cookie = ->(request) { request.cookies["cookie_consent"] == "yes" }
 
   # What's shared about each visitor. By default: a few request headers (User-Agent, Referer,

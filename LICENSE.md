@@ -280,9 +280,9 @@ Where your use of the Software involves personal data, including Visit Data, eLL
 
 ## 12. Visitors, cookies, and Visit Data
 
-The SDK sends Visit Data about the visitors to your Covered Websites to eLLMo, and sets a
-first-party `ellmo_ext_vid` cookie in their browsers unless you turn it off. You are solely
-responsible for:
+The SDK sends Visit Data about the visitors to your Covered Websites to eLLMo, and, if you turn
+it on, sets a first-party `ellmo_ext_vid` cookie in their browsers. You are solely responsible
+for:
 
 **(a)** having a lawful basis to collect Visit Data and share it with eLLMo, and honoring
 data-subject rights, under every law that applies to you and to your visitors, including the
