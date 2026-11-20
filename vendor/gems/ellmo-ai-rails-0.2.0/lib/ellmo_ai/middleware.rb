@@ -148,7 +148,8 @@ module EllmoAi
       event = {
         "url" => Visitor.utf8(request.url),
         "method" => env["REQUEST_METHOD"],
-        "headers" => Visitor.headers(env, cookies: config.forward_cookies),
+        "headers" => Visitor.headers(env, cookies: config.forward_cookies, all: config.forward_headers,
+                                          full_ips: config.truncate_ip == false),
         "cf" => {},
         "status" => status.to_i,
         "latencyMs" => latency_ms,
@@ -158,7 +159,7 @@ module EllmoAi
         "visitorId" => visitor_id,
         "visitId" => SecureRandom.uuid,
         "kind" => prepared[:kind],
-        "ip" => Visitor.ip(env),
+        "ip" => Visitor.ip(env, truncate: config.truncate_ip != false), # only an explicit false sends it whole
         "ts" => (Time.now.to_f * 1000).round
       }
       env[DEFER] ? env[VISIT] = event : EllmoAi.visit_reporter.report(event)

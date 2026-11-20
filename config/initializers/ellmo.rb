@@ -26,10 +26,13 @@ EllmoAi.configure do |config|
   # active schema for crawlers that run JavaScript. Can cost you your own rich results.
   # config.hide_other_json_ld = true
 
-  # Also send visitors' Cookie header to eLLMo (default false: it holds your session cookies).
-  # config.forward_cookies = true
+  # What's shared about each visitor. By default: a few request headers (User-Agent, Referer,
+  # Accept, Accept-Language, your host, country and city), no cookies, and a truncated IP.
+  # config.forward_headers = true  # every request header
+  # config.forward_cookies = true  # the visitor's Cookie header (your session cookies)
+  # config.truncate_ip = false     # the full IP address
 
   # Log every call to eLLMo and its answer ("[ellmo-ai http]"). Or set ELLMO_DEBUG=1.
-  # Page-view uploads are logged in full, visitors' IPs included.
+  # Page-view uploads are logged in full, visitors' headers and IPs included.
   # config.debug = Rails.env.development?
 end

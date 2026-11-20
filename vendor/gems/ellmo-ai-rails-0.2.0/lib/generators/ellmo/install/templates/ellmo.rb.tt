@@ -23,7 +23,13 @@ EllmoAi.configure do |config|
   # Set the visitor cookie only for visitors who consented (default: every visitor).
   # config.visitor_cookie = ->(request) { request.cookies["cookie_consent"] == "yes" }
 
+  # What's shared about each visitor. By default: a few request headers (User-Agent, Referer,
+  # Accept, Accept-Language, your host, country and city), no cookies, and a truncated IP.
+  # config.forward_headers = true  # every request header
+  # config.forward_cookies = true  # the visitor's Cookie header (your session cookies)
+  # config.truncate_ip = false     # the full IP address
+
   # Log every call to eLLMo and its answer ("[ellmo-ai http]"). Or set ELLMO_DEBUG=1.
-  # Page-view uploads are logged in full, visitors' cookies and IPs included.
+  # Page-view uploads are logged in full, visitors' headers and IPs included.
   # config.debug = Rails.env.development?
 end

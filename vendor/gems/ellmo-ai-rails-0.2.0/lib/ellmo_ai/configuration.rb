@@ -40,13 +40,21 @@ module EllmoAi
     # Include the visitor's Cookie header in the headers sent to eLLMo (default false): it holds
     # your session cookies, and eLLMo doesn't need them (the visitor ID is sent on its own).
     attr_accessor :forward_cookies
+    # Send every request header to eLLMo (default false). Off, only user-agent, referer, accept,
+    # accept-language, the site's host and the host's country and city headers are sent
+    # (EllmoAi::Visitor::DEFAULT_HEADERS). Doesn't add cookies (forward_cookies) or full IPs.
+    attr_accessor :forward_headers
+    # Truncate the visitor's IP address before it's sent (default true): 203.0.113.9 goes as
+    # 203.0.113.0, an IPv6 address as its first 48 bits. false sends it whole.
+    attr_accessor :truncate_ip
     attr_accessor :flush_interval  # seconds between batches (5)
     attr_accessor :batch_size      # send early once this many are queued (100; max 250)
     attr_accessor :max_queue       # visits held in memory before new ones are dropped (10_000)
     attr_accessor :report_timeout  # seconds per batch POST (2.0)
 
     # Log every call to eLLMo and its answer ("[ellmo-ai http]", info level). Page-view uploads
-    # are logged in full: visitors' headers (cookies included) and IPs. Default: ELLMO_DEBUG=1.
+    # are logged in full: visitors' headers and IPs (all headers, cookies and full IPs only if
+    # you turned those on). Default: ELLMO_DEBUG=1.
     attr_accessor :debug
     attr_accessor :debug_body_limit # response characters logged (2000; 0 = all). ELLMO_DEBUG_BODY
 
@@ -77,6 +85,8 @@ module EllmoAi
       @report_visits = true
       @visitor_cookie = true
       @forward_cookies = false
+      @forward_headers = false
+      @truncate_ip = true
       @flush_interval = 5
       @batch_size = 100
       @max_queue = 10_000
