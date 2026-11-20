@@ -6,10 +6,10 @@ EllmoAi.configure do |config|
   # This demo reads two switches from the environment, so you can try them without editing code
   # (scripts/try-ellmo.sh). In your app, set them here directly.
   #
-  # The first-party ellmo_ext_vid cookie that recognizes returning visitors (default true). A
-  # callable decides per request, e.g. after consent:
+  # The first-party ellmo_ext_vid cookie that recognizes returning visitors (default false: no
+  # cookie, and no visitor ID is sent). A callable decides per request, e.g. after consent:
   #   config.visitor_cookie = ->(request) { request.cookies["cookie_consent"] == "yes" }
-  config.visitor_cookie = ENV["ELLMO_VISITOR_COOKIE"] != "false"
+  config.visitor_cookie = ENV["ELLMO_VISITOR_COOKIE"] == "true"
   # Report page views to eLLMo (default true).
   config.report_visits = ENV["ELLMO_REPORT_VISITS"] != "false"
 

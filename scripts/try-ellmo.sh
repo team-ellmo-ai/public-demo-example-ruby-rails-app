@@ -3,8 +3,8 @@
 # for eLLMo's API (scripts/fake_ellmo_server.rb), runs the app against it with `rails server`,
 # loads /tasks like a browser, and prints what the page got and what eLLMo received.
 #
-#   ./scripts/try-ellmo.sh                                  # defaults: cookie on, page views on
-#   ELLMO_VISITOR_COOKIE=false ./scripts/try-ellmo.sh       # a site with the visitor cookie off
+#   ./scripts/try-ellmo.sh                                  # defaults: cookie off, page views on
+#   ELLMO_VISITOR_COOKIE=true ./scripts/try-ellmo.sh        # a site with the visitor cookie on
 #   ELLMO_REPORT_VISITS=false ./scripts/try-ellmo.sh        # page views turned off in the app
 #   FAKE_ELLMO_VISITS=false ./scripts/try-ellmo.sh          # page views switched off by eLLMo
 set -euo pipefail

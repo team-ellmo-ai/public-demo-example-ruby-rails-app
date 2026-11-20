@@ -70,12 +70,7 @@ module EllmoAi
       return [status, headers, body] if health_check?(env)
 
       body = add_content(env, status, headers, body)
-      visitor_id = Visitor.visitor_id(env)
-      if visitor_id.nil? && set_cookie?(env, prepared, headers)
-        visitor_id = Visitor.new_visitor_id
-        append_cookie(headers, Visitor.cookie(visitor_id, https?(env)))
-      end
-      report(env, prepared, status, latency_ms, visitor_id)
+      report(env, prepared, status, latency_ms, visitor_id(env, prepared, headers))
       [status, headers, body]
     rescue StandardError => e
       warn_once(e)
@@ -165,12 +160,25 @@ module EllmoAi
       env[DEFER] ? env[VISIT] = event : EllmoAi.visit_reporter.report(event)
     end
 
-    # Whether to give a first-time visitor the eLLMo cookie. Not when nothing is reported (the ID
+    # The visitor ID sent with this page view: from the visitor's cookie, or a new one in a new
+    # cookie. nil while the visitor cookie is off for this request (the default, or no consent),
+    # even if the visitor already has the cookie.
+    def visitor_id(env, prepared, headers)
+      return nil unless config.report_visits && config.visitor_cookie_for?(env)
+
+      id = Visitor.visitor_id(env)
+      if id.nil? && set_cookie?(prepared, headers)
+        id = Visitor.new_visitor_id
+        append_cookie(headers, Visitor.cookie(id, https?(env)))
+      end
+      id
+    end
+
+    # Whether to give a first-time visitor the eLLMo cookie. Not while page views are off (the ID
     # would serve nothing), and not on responses a CDN or proxy may cache for everyone: a
     # Set-Cookie there stops most of them caching the page, or hands one ID to every visitor.
-    def set_cookie?(env, prepared, headers)
-      return false unless config.report_visits && EllmoAi.client_access(prepared[:client_id]).visits?
-      return false unless config.visitor_cookie_for?(env)
+    def set_cookie?(prepared, headers)
+      return false unless EllmoAi.client_access(prepared[:client_id]).visits?
 
       cache_control = header(headers, "cache-control").to_s.downcase
       shared = cache_control.include?("public") || cache_control.include?("s-maxage")

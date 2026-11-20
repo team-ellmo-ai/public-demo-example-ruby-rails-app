@@ -23,7 +23,7 @@ The gem is included with an eLLMo AI subscription, and you need the client ID eL
 SHA-256 of `ellmo-ai-rails-0.2.1.gem`:
 
 ```text
-49f0ca2a7f9dd3e1bf383ca2137fe7a4c520e1b4019f8edfbf285359b19bb119
+e3f6983e4f633d4f2edb5d7298a65cf1f91bc97639966db3eb0b59ea5b746698
 ```
 
 This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.2.1`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.
@@ -41,7 +41,7 @@ The settings this demo shows, in `config/initializers/ellmo.rb`:
 
 | Setting | Default | Here |
 |---|---|---|
-| `visitor_cookie` | `true` | `ELLMO_VISITOR_COOKIE=false` turns off the first-party `ellmo_ext_vid` cookie that recognizes returning visitors. Page views are still reported, without a visitor ID. A callable can wait for consent instead. |
+| `visitor_cookie` | `false` | `ELLMO_VISITOR_COOKIE=true` turns on the first-party `ellmo_ext_vid` cookie that recognizes returning visitors, and sends its ID with page views. Off, no visitor ID is sent, even from a cookie the visitor already has. A callable can wait for consent instead. |
 | `report_visits` | `true` | `ELLMO_REPORT_VISITS=false` stops page views. Pages still get content. |
 | `forward_headers` | `false` | Only a few request headers are sent to eLLMo (`User-Agent`, `Referer`, `Accept`, `Accept-Language`, your host, country and city) unless you turn this on. |
 | `forward_cookies` | `false` | Your visitors' `Cookie` header (your session cookies) is never sent to eLLMo unless you turn this on. |
@@ -60,12 +60,12 @@ eLLMo can also switch page views or content off for a client ID from its side; t
 
 ```bash
 ./scripts/try-ellmo.sh                              # defaults
-ELLMO_VISITOR_COOKIE=false ./scripts/try-ellmo.sh   # visitor cookie off
+ELLMO_VISITOR_COOKIE=true ./scripts/try-ellmo.sh    # visitor cookie on
 ELLMO_REPORT_VISITS=false ./scripts/try-ellmo.sh    # page views off in the app
 FAKE_ELLMO_VISITS=false ./scripts/try-ellmo.sh      # page views switched off by eLLMo
 ```
 
-With the visitor cookie off:
+With the defaults (visitor cookie off):
 
 ```text
 GET /tasks
@@ -82,7 +82,7 @@ eLLMo received:
 
 `test/integration/ellmo_test.rb` runs the whole app, the gem's middleware included, against the same stand-in (`test/support/fake_ellmo.rb`). It covers:
 
-- **Visitor cookie off:** structured data and semantic HTML in the page, no cookie, and the page view is reported without a visitor ID.
+- **Visitor cookie off (the default):** structured data and semantic HTML in the page, no cookie, and the page view is reported without a visitor ID, even for a visitor who already has the cookie.
 - **Visitor cookie on:** a first-time visitor gets the cookie, and their page views carry its ID.
 - **Page views switched off by eLLMo, or turned off in the app:** pages still get content, and nothing is reported.
 - **Content switched off by eLLMo:** pages go out as the app rendered them, and views are still reported.
