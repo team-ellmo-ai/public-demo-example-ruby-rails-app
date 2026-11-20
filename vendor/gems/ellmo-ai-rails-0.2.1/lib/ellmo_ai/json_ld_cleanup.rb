@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "cgi"
+# Only CGI.escapeHTML is used. Ruby 4.0 keeps cgi/escape but removed the rest of cgi.
+require "cgi/escape"
 
 module EllmoAi
   # `config.hide_other_json_ld`: makes eLLMo's structured data the only active JSON-LD on the

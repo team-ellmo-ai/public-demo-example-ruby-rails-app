@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.1 (2026-11-20)
+
+- README: the install steps work. The gem isn't on RubyGems, so `bundle add ellmo-ai-rails` alone failed. The README now downloads the gem file, checks its SHA-256 checksum, vendors it and points Bundler at it, and links to the install guide. A new "If the install fails" section covers a checksum that doesn't match and the Ruby 4.0 `logger` error.
+- The gem now depends on `logger`. Ruby 4.0 removed it from the default gems, so on Ruby 4.0 an app with no other gem that depends on `logger` failed to load this one (`cannot load such file -- logger`).
+- The gem loads only `cgi/escape`, not all of `cgi`, so Ruby 4.0 no longer warns that the CGI library was removed (shown when Ruby warnings are on).
+
+## 0.2.0 (2026-11-20)
 
 - Privacy: only a short list of request headers is sent to eLLMo (`User-Agent`, `Referer`, `Accept`, `Accept-Language`, the site's host, and the host's country and city headers; `config.forward_headers = true` sends all of them), and visitors' IP addresses are truncated (`203.0.113.0`; `config.truncate_ip = false` sends them whole). Same lists and truncation as `ellmo-ai-react`.
 

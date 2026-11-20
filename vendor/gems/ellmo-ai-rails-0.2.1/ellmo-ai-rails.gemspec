@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Add eLLMo AI's content (structured data and semantic HTML) to your Rails pages"
   spec.description = "Rack middleware and Rails helpers that put eLLMo AI's structured data and semantic HTML " \
                      "into the HTML your app serves, cached, and report page views in the background."
-  spec.homepage = "https://www.tryellmo.ai?utm_source=rubygems&utm_medium=package&utm_campaign=ellmo-ai-rails"
+  spec.homepage = "https://www.tryellmo.ai?utm_source=gem&utm_medium=package&utm_campaign=ellmo-ai-rails"
   spec.license = "Nonstandard"
   spec.required_ruby_version = ">= 3.2"
 
@@ -17,6 +17,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rack", ">= 2.2", "< 4"
+  # Not a default gem since Ruby 4.0, so it has to be listed
+  spec.add_dependency "logger", ">= 1.4", "< 2"
 
   spec.metadata["rubygems_mfa_required"] = "true"
 end

@@ -2,7 +2,7 @@
 
 A small, fully working Ruby on Rails app from [eLLMo AI](https://www.tryellmo.ai?utm_source=github&utm_medium=repo&utm_campaign=public-demo-example-ruby-rails-app): a SQLite-backed Tasks list with full CRUD (create, show, edit, delete).
 
-It's also where you download **`ellmo-ai-rails`**, eLLMo's gem for Rails apps, until it's published on RubyGems. See [Download the eLLMo Rails gem](#download-the-ellmo-rails-gem).
+It's also where you download **`ellmo-ai-rails`**, eLLMo's gem for Rails apps. See [Download the eLLMo Rails gem](#download-the-ellmo-rails-gem).
 
 ## About eLLMo AI
 
@@ -16,17 +16,17 @@ It's also where you download **`ellmo-ai-rails`**, eLLMo's gem for Rails apps, u
 
 ## Download the eLLMo Rails gem
 
-[`dist/ellmo-ai-rails-0.2.0.gem`](dist/ellmo-ai-rails-0.2.0.gem) adds eLLMo's content (schema.org structured data and semantic HTML) to the HTML your Rails app serves, so search engines and AI assistants understand your pages. It also reports page views, AI crawler visits included, to eLLMo in the background. It works with Rails 6.1+ and any Rack app on Ruby 3.2+.
+[`dist/ellmo-ai-rails-0.2.1.gem`](dist/ellmo-ai-rails-0.2.1.gem) adds eLLMo's content (schema.org structured data and semantic HTML) to the HTML your Rails app serves, so search engines and AI assistants understand your pages. It also reports page views, AI crawler visits included, to eLLMo in the background. It works with Rails 6.1+ and any Rack app on Ruby 3.2+.
 
 The gem is included with an eLLMo AI subscription, and you need the client ID eLLMo issues for your site. Install it by following the [Rails SDK docs](https://docs.tryellmo.ai/developers/rails/overview?utm_source=github&utm_medium=repo&utm_campaign=public-demo-example-ruby-rails-app).
 
-SHA-256 of `ellmo-ai-rails-0.2.0.gem`:
+SHA-256 of `ellmo-ai-rails-0.2.1.gem`:
 
 ```text
-5dfc1540019d38cc86298c08f75299abd618051ea9215b2c5fa7e43ab516c8e9
+49f0ca2a7f9dd3e1bf383ca2137fe7a4c520e1b4019f8edfbf285359b19bb119
 ```
 
-This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.2.0`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.
+This demo app has the gem installed: it is vendored in `vendor/gems/ellmo-ai-rails-0.2.1`, and `config/initializers/ellmo.rb` reads the client ID from `ELLMO_CLIENT_ID`.
 
 ## eLLMo in this app
 
