@@ -115,9 +115,9 @@ module EllmoAi
 
     # An IP address with the part that identifies one device removed: IPv4 to its first 24 bits
     # (203.0.113.9 -> 203.0.113.0), IPv6 to its first 48 (2001:db8:85a3::8a2e:370:7334 ->
-    # 2001:db8:85a3::), an IPv4-mapped IPv6 address as IPv4. Enough for country-level location,
-    # not for one household. A port or an IPv6 zone is dropped first. nil for anything that isn't
-    # an IP address, so it isn't sent. Same results as ellmo-ai-react.
+    # 2001:db8:85a3::), an IPv4-mapped IPv6 address as IPv4. A port or an IPv6 zone is dropped
+    # first. nil for anything that isn't an IP address, so it isn't sent. Same results as
+    # ellmo-ai-react.
     def truncate_ip(value)
       ip = value.to_s.strip
       if (bracketed = ip[/\A\[([^\]]+)\](?::\d+)?\z/, 1])
