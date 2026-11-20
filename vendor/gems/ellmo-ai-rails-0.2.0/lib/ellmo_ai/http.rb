@@ -40,7 +40,8 @@ module EllmoAi
 
     # Logs each call and its answer, "[ellmo-ai http]", at info level. On with `config.debug`.
     # A gzipped POST (the page-view upload) is logged decoded and in full before it's sent: it
-    # holds visitors' headers (cookies included) and IPs, so keep this out of shared logs.
+    # holds visitors' headers and IPs (more of them if the site forwards all headers, cookies or full
+    # IPs), so keep this out of shared logs.
     class DebugAdapter
       def initialize(inner, logger:, body_limit:)
         @inner = inner

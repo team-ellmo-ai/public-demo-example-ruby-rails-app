@@ -96,6 +96,15 @@ class EllmoTest < ActionDispatch::IntegrationTest
     assert_equal "Mozilla/5.0 (Macintosh) Safari/605.1.15", headers["user-agent"]
   end
 
+  test "only a few request headers and a truncated IP are sent to eLLMo" do
+    get "/tasks", headers: browser.merge("X-Forwarded-For" => "203.0.113.9", "X-Custom" => "1")
+
+    view = wait_for_page_views(1).first
+    assert_equal "203.0.113.0", view["ip"]
+    refute view["headers"].key?("x-forwarded-for"), "the full IP isn't sent in a header either"
+    refute view["headers"].key?("x-custom")
+  end
+
   test "JSON requests and files are left alone: no content, no page view" do
     task = tasks(:one)
     get "/tasks/#{task.id}.json", headers: { "Accept" => "application/json" }

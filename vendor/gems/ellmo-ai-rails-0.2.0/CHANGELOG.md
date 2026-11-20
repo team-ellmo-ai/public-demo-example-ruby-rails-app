@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.1.0 (unreleased)
+## 0.2.0 (unreleased)
+
+- Privacy: only a short list of request headers is sent to eLLMo (`User-Agent`, `Referer`, `Accept`, `Accept-Language`, the site's host, and the host's country and city headers; `config.forward_headers = true` sends all of them), and visitors' IP addresses are truncated (`203.0.113.0`; `config.truncate_ip = false` sends them whole). Same lists and truncation as `ellmo-ai-react`.
+
+## 0.1.0 (2026-11-08)
 
 - First version: Rack middleware and Rails helpers that add eLLMo content (cached, refreshed in the background) and report page views from a background thread in gzipped batches (`source: "rails-sdk"`).
 - Checks this client's switches (`GET analytics-v2.tryellmo.com/access/<client id>`, every 30 min per process, in the background): page views off discards them, content off serves and fetches none. One failed check is skipped; two in a row count as off.
